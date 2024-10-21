@@ -11,6 +11,7 @@ function App() {
           id="sendIdForm"
           onSubmit={(event) => {
             event.preventDefault();
+            //@ts-expect-error Because
             changeId(+event.currentTarget.elements.idInput.value);
           }}
         >

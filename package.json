@@ -1,10 +1,13 @@
 {
   "name": "my-vue-app",
   "private": true,
+  "homepage": "https://ezzhevichka.github.io/react-gh-pages",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "predeploy": "pnpm run build",
+    "deploy": "gh-pages -d dist",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -12,6 +15,7 @@
   "dependencies": {
     "effector": "^23.2.3",
     "effector-react": "^23.2.1",
+    "gh-pages": "^6.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { createEffect, createEvent, createStore, sample } from 'effector';
 
 export const inputStore = createStore({ id: 0, title: '', loading: false, isError: false });
@@ -12,7 +13,7 @@ const sendId = createEffect(async ({ id }: { id: number }) => {
   return { id, item: await req.json() };
 });
 
-inputStore.on(sendId.failData, (src, payload) => {
+inputStore.on(sendId.failData, (src, _) => {
   console.log('fail');
   return {
     ...src,
@@ -21,14 +22,14 @@ inputStore.on(sendId.failData, (src, payload) => {
   };
 });
 
-inputStore.on(sendId.pending, (src, payload) => {
+inputStore.on(sendId.pending, (src, _) => {
   return {
     ...src,
     loading: sendId.pending.getState(),
   };
 });
 
-inputStore.on(sendId.doneData, (src, payload) => {
+inputStore.on(sendId.doneData, (_, payload) => {
   return {
     id: payload.id,
     title: `${payload.item.title}`,
@@ -41,6 +42,6 @@ sample({
   source: inputStore,
   target: sendId,
   clock: changeId,
-  filter: (src, payload: number) => typeof payload === 'number' && payload > 0 && payload < 100,
-  fn: (src, payload) => ({ id: payload }),
+  filter: (_, payload: number) => typeof payload === 'number' && payload > 0 && payload < 100,
+  fn: (_, payload) => ({ id: payload }),
 });
