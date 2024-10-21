@@ -1,8 +1,14 @@
-import { inputStore, changeId } from './store';
+import { inputModel } from './store';
 import { useUnit } from 'effector-react';
 
 function App() {
-  const store = useUnit(inputStore);
+  const { $inputStore, $pendingStore, $productStore, $errorStore, changeId } = inputModel;
+  const inputStore = useUnit($inputStore);
+  const pendingStore = useUnit($pendingStore);
+  const productStore = useUnit($productStore);
+  const errorStore = useUnit($errorStore);
+
+  console.log(errorStore);
 
   return (
     <>
@@ -16,13 +22,13 @@ function App() {
           }}
         >
           <input type="text" name="idInput" form="sendIdForm" />
-          <button type="submit" disabled={store.loading} style={{ cursor: store.loading ? 'not-allowed' : 'pointer' }}>
+          <button type="submit" disabled={pendingStore} style={{ cursor: pendingStore ? 'not-allowed' : 'pointer' }}>
             Send Id
           </button>
-          {store.isError && <span>Вы плохо ввели число</span>}
-          {!!store.id && !!store.title && !store.isError && (
+          {errorStore && <span>Вы плохо ввели число</span>}
+          {!!inputStore && !!productStore && !errorStore && (
             <span>
-              {store.id} {store.title}
+              {inputStore} {productStore}
             </span>
           )}
         </form>

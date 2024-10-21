@@ -1,47 +1,56 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { createEffect, createEvent, createStore, sample } from 'effector';
 
-export const inputStore = createStore({ id: 0, title: '', loading: false, isError: false });
+const $inputStore = createStore<number>(0);
+const $pendingStore = createStore<boolean>(false);
+const $errorStore = createStore<boolean>(false);
+const $productStore = createStore<string>('');
 
-export const changeId = createEvent<number>();
-const sendId = createEffect(async ({ id }: { id: number }) => {
+const changeId = createEvent<number>();
+
+const sendIdFx = createEffect(async (id: number) => {
   const url = `https://dummyjson.com/products/${id}`;
   const req = await fetch(url);
   if (req.status !== 200) {
     throw new Error('Error');
   }
-  return { id, item: await req.json() };
-});
-
-inputStore.on(sendId.failData, (src, _) => {
-  console.log('fail');
-  return {
-    ...src,
-    loading: false,
-    isError: true,
-  };
-});
-
-inputStore.on(sendId.pending, (src, _) => {
-  return {
-    ...src,
-    loading: sendId.pending.getState(),
-  };
-});
-
-inputStore.on(sendId.doneData, (_, payload) => {
-  return {
-    id: payload.id,
-    title: `${payload.item.title}`,
-    loading: false,
-    isError: false,
-  };
+  const item = await req.json();
+  return item.title;
 });
 
 sample({
-  source: inputStore,
-  target: sendId,
   clock: changeId,
-  filter: (_, payload: number) => typeof payload === 'number' && payload > 0 && payload < 100,
-  fn: (_, payload) => ({ id: payload }),
+  target: [sendIdFx, $inputStore],
+  filter: (id: number) => id > 0 && id < 100,
 });
+
+sample({
+  clock: sendIdFx.pending,
+  target: $pendingStore,
+  fn: () => !!sendIdFx.pending.getState(),
+});
+
+sample({
+  clock: sendIdFx.doneData,
+  target: $productStore,
+});
+
+sample({
+  clock: sendIdFx.doneData,
+  target: $errorStore,
+  fn: () => false,
+});
+
+sample({
+  clock: sendIdFx.fail,
+  target: $errorStore,
+  fn: () => true,
+});
+
+sample({
+  clock: [sendIdFx.done, sendIdFx.fail],
+  fn: () => false,
+  target: $pendingStore,
+});
+
+export const inputModel = { changeId, $inputStore, $pendingStore, $productStore, $errorStore };
